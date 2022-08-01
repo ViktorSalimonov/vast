@@ -19,7 +19,8 @@ type Creative struct {
 	heignt   int
 }
 
-// FIXME: getVideoDuration and getVideoSize functions have duplicate lines
+// FIXME: getVideoDuration and getVideoSize functions have duplicate lines.
+// Replace these functions by the one function that will take creative struct pointer.
 
 // Returns duration string in the VAST tag specific format "hours:minutes:seconds"
 func getVideoDuration(path string) string {

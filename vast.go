@@ -7,9 +7,9 @@ import (
 	"github.com/beevik/etree"
 )
 
-const Skipoffset = "00:00:05"
+const SkipOffset = "00:00:05"
 
-func generate_vast(creative_data Creative) {
+func generate_vast(creative Creative) {
 	doc := etree.NewDocument()
 	doc.CreateProcInst("VAST", `version="3.0"`)
 
@@ -28,20 +28,20 @@ func generate_vast(creative_data Creative) {
 	impression.CreateCData("https://adserver.com/track/impression")
 
 	creatives := inline.CreateElement("Creatives")
-	creative := creatives.CreateElement("Creative")
+	creative_elem := creatives.CreateElement("Creative")
 
-	linear := creative.CreateElement("Linear")
-	linear.CreateAttr("skipoffset", Skipoffset)
+	linear := creative_elem.CreateElement("Linear")
+	linear.CreateAttr("skipoffset", SkipOffset)
 
 	duration := linear.CreateElement("Duration")
-	duration.CreateText(creative_data.duration)
+	duration.CreateText(creative.duration)
 
 	mediafiles := linear.CreateElement("MediaFiles")
 	mediafile := mediafiles.CreateElement("MediaFile")
 	mediafile.CreateAttr("delivery", "progressive")
-	mediafile.CreateAttr("type", creative_data.format)
-	mediafile.CreateAttr("width", strconv.Itoa(creative_data.width))
-	mediafile.CreateAttr("height", strconv.Itoa(creative_data.heignt))
+	mediafile.CreateAttr("type", creative.format)
+	mediafile.CreateAttr("width", strconv.Itoa(creative.width))
+	mediafile.CreateAttr("height", strconv.Itoa(creative.heignt))
 	mediafile.CreateCData("htttp://example.com/") // TODO: upload the file to s3 and use its s3 url here
 
 	doc.Indent(2)
