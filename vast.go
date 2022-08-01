@@ -35,7 +35,7 @@ func generate_vast(creative_data Creative) {
 	mediafiles := linear.CreateElement("MediaFiles")
 	mediafile := mediafiles.CreateElement("MediaFile")
 	mediafile.CreateAttr("delivery", "progressive")
-	mediafile.CreateAttr("type", "video/mp4")
+	mediafile.CreateAttr("type", creative_data.format)
 
 	doc.Indent(2)
 	doc.WriteTo(os.Stdout)
