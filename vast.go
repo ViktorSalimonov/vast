@@ -39,6 +39,7 @@ func generate_vast(creative_data Creative) {
 	mediafile.CreateAttr("type", creative_data.format)
 	mediafile.CreateAttr("width", strconv.Itoa(creative_data.width))
 	mediafile.CreateAttr("height", strconv.Itoa(creative_data.heignt))
+	mediafile.CreateCData("htttp://example.com/") // TODO: upload the file to s3 and use its s3 url here
 
 	doc.Indent(2)
 	doc.WriteTo(os.Stdout)
