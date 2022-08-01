@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/beevik/etree"
 )
@@ -36,6 +37,8 @@ func generate_vast(creative_data Creative) {
 	mediafile := mediafiles.CreateElement("MediaFile")
 	mediafile.CreateAttr("delivery", "progressive")
 	mediafile.CreateAttr("type", creative_data.format)
+	mediafile.CreateAttr("width", strconv.Itoa(creative_data.width))
+	mediafile.CreateAttr("height", strconv.Itoa(creative_data.heignt))
 
 	doc.Indent(2)
 	doc.WriteTo(os.Stdout)
