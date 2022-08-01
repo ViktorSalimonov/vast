@@ -7,6 +7,8 @@ import (
 	"github.com/beevik/etree"
 )
 
+const Skipoffset = "00:00:05"
+
 func generate_vast(creative_data Creative) {
 	doc := etree.NewDocument()
 	doc.CreateProcInst("VAST", `version="3.0"`)
@@ -29,6 +31,7 @@ func generate_vast(creative_data Creative) {
 	creative := creatives.CreateElement("Creative")
 
 	linear := creative.CreateElement("Linear")
+	linear.CreateAttr("skipoffset", Skipoffset)
 
 	duration := linear.CreateElement("Duration")
 	duration.CreateText(creative_data.duration)
