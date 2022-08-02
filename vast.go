@@ -9,7 +9,7 @@ import (
 
 const SkipOffset = "00:00:05"
 
-func generate_vast(creative Creative) {
+func generateVAST(creative Creative) {
 	doc := etree.NewDocument()
 	doc.CreateProcInst("VAST", `version="3.0"`)
 
@@ -27,10 +27,25 @@ func generate_vast(creative Creative) {
 	impression := inline.CreateElement("Impression")
 	impression.CreateCData("https://adserver.com/track/impression")
 
-	creatives := inline.CreateElement("Creatives")
-	creative_elem := creatives.CreateElement("Creative")
+	trackingEvents := inline.CreateElement("TrackingEvents")
+	trackingEventStart := trackingEvents.CreateElement("Tracking")
+	trackingEventStart.CreateAttr("type", "start")
+	trackingEventStart.CreateCData("https://adserver.com/track/start")
+	trackingEventMid := trackingEvents.CreateElement("Tracking")
+	trackingEventMid.CreateAttr("type", "midpoint")
+	trackingEventMid.CreateCData("https://adserver.com/track/midpoint")
+	trackingEventComplete := trackingEvents.CreateElement("Tracking")
+	trackingEventComplete.CreateAttr("type", "complete")
+	trackingEventComplete.CreateCData("https://adserver.com/track/complete")
 
-	linear := creative_elem.CreateElement("Linear")
+	videoClicks := inline.CreateElement("VideoClicks")
+	clickThrough := videoClicks.CreateElement("ClickThrough")
+	clickThrough.CreateCData(creative.clickthrough)
+
+	creatives := inline.CreateElement("Creatives")
+	creativeElem := creatives.CreateElement("Creative")
+
+	linear := creativeElem.CreateElement("Linear")
 	linear.CreateAttr("skipoffset", SkipOffset)
 
 	duration := linear.CreateElement("Duration")

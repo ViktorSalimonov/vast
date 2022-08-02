@@ -12,11 +12,12 @@ import (
 )
 
 type Creative struct {
-	path     string
-	duration string
-	format   string
-	width    int
-	heignt   int
+	path         string
+	duration     string
+	format       string
+	width        int
+	heignt       int
+	clickthrough string
 }
 
 func getVideoData(path string) *ffprobe.ProbeData {
@@ -51,11 +52,10 @@ func createCreative(path string) *Creative {
 }
 
 func main() {
-	// TODO: Validate video format
 	FILENAME := "./videos/video_1.mp4"
 
 	creative := createCreative(FILENAME)
-	fmt.Println(*creative)
+	creative.clickthrough = "https://vsalimonov.com"
 
-	generate_vast(*creative)
+	generateVAST(*creative)
 }
