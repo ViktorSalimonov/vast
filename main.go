@@ -19,70 +19,43 @@ type Creative struct {
 	heignt   int
 }
 
-// FIXME: getVideoDuration and getVideoSize functions have duplicate lines.
-// Replace these functions by the one function that will take creative struct pointer.
-
-// Returns duration string in the VAST tag specific format "hours:minutes:seconds"
-func getVideoDuration(path string) string {
+func getVideoData(path string) *ffprobe.ProbeData {
 	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelFn()
 
 	fileReader, err := os.Open(path)
 	if err != nil {
-		log.Panicf("Error opening test file: %v", err)
+		log.Panicf("Error opening the file: %v", err)
 	}
 
 	data, err := ffprobe.ProbeReader(ctx, fileReader)
 	if err != nil {
 		log.Panicf("Error getting data: %v", err)
 	}
-	durationInSeconds := int(data.Format.DurationSeconds)
-
-	hours := durationInSeconds / 3600
-	minutes := (durationInSeconds % 3600) / 60
-	seconds := durationInSeconds % 60
-	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
+	return data
 }
 
-// Returns video width and height
-func getVideoSize(path string) (width, height int) {
-	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelFn()
+func createCreative(path string) *Creative {
+	videoData := getVideoData(path)
 
-	fileReader, err := os.Open(path)
-	if err != nil {
-		log.Panicf("Error opening test file: %v", err)
-	}
+	width, height := videoData.FirstVideoStream().Width, videoData.FirstVideoStream().Height
+	durationInSeconds := int(videoData.Format.DurationSeconds)
+	durationFormatted := fmt.Sprintf("%02d:%02d:%02d", durationInSeconds/3600, (durationInSeconds%3600)/60, durationInSeconds%60)
+	videoFormatMap := map[string]string{".mp4": "video/mp4", ".avi": "video/api"}
 
-	data, err := ffprobe.ProbeReader(ctx, fileReader)
-	if err != nil {
-		log.Panicf("Error getting data: %v", err)
-	}
-
-	return data.FirstVideoStream().Width, data.FirstVideoStream().Height
-}
-
-// Returns video format string in the VAST tag specific format eg. "video/mp4"
-func getVideoFormat(path string) string {
-	ext := filepath.Ext(path)
-	if ext == ".mp4" {
-		return "video/mp4"
-	} else if ext == ".mkv" {
-		return "video/mkv"
-	} else {
-		return ""
-	}
+	creative := Creative{path: path}
+	creative.width, creative.heignt = width, height
+	creative.duration = durationFormatted
+	creative.format = videoFormatMap[filepath.Ext(path)]
+	return &creative
 }
 
 func main() {
+	// TODO: Validate video format
 	FILENAME := "./videos/video_1.mp4"
 
-	creative := Creative{}
-	creative.path = FILENAME
-	creative.duration = getVideoDuration(creative.path)
-	creative.format = getVideoFormat(creative.path)
-	creative.width, creative.heignt = getVideoSize(creative.path)
-	fmt.Println(creative)
+	creative := createCreative(FILENAME)
+	fmt.Println(*creative)
 
-	generate_vast(creative)
+	generate_vast(*creative)
 }
