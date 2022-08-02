@@ -36,7 +36,7 @@ func getVideoData(path string) *ffprobe.ProbeData {
 	return data
 }
 
-func createCreative(path string) *Creative {
+func initCreative(path string) *Creative {
 	videoData := getVideoData(path)
 
 	width, height := videoData.FirstVideoStream().Width, videoData.FirstVideoStream().Height
@@ -52,10 +52,16 @@ func createCreative(path string) *Creative {
 }
 
 func main() {
-	FILENAME := "./videos/video_1.mp4"
+	var videoPath string
+	fmt.Print("Enter the creative file path: ")
+	fmt.Scanln(&videoPath)
 
-	creative := createCreative(FILENAME)
-	creative.clickthrough = "https://vsalimonov.com"
+	var landingPage string
+	fmt.Print("Enter the landing page: ")
+	fmt.Scanln(&landingPage)
+
+	creative := initCreative(videoPath)
+	creative.clickthrough = landingPage
 
 	generateVAST(*creative)
 }
