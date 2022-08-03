@@ -9,7 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/beevik/etree"
 	"gopkg.in/vansante/go-ffprobe.v2"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 const ResultXmlFolder string = "results"
@@ -21,6 +24,8 @@ type Creative struct {
 	width        int
 	heignt       int
 	clickthrough string
+	vastTree     etree.Document
+	xmlPath      string
 }
 
 func getVideoData(path string) *ffprobe.ProbeData {
@@ -39,39 +44,72 @@ func getVideoData(path string) *ffprobe.ProbeData {
 	return data
 }
 
-func newCreative(path string) *Creative {
+func NewCreative(path string, landingPage string) *Creative {
 	videoData := getVideoData(path)
 
-	width, height := videoData.FirstVideoStream().Width, videoData.FirstVideoStream().Height
 	durationInSeconds := int(videoData.Format.DurationSeconds)
 	durationFormatted := fmt.Sprintf("%02d:%02d:%02d", durationInSeconds/3600, (durationInSeconds%3600)/60, durationInSeconds%60)
 	videoFormatMap := map[string]string{".mp4": "video/mp4", ".avi": "video/api"}
 
-	creative := Creative{path: path}
-	creative.width, creative.heignt = width, height
-	creative.duration = durationFormatted
-	creative.format = videoFormatMap[filepath.Ext(path)]
-	return &creative
+	return &Creative{
+		path:         path,
+		duration:     durationFormatted,
+		format:       videoFormatMap[filepath.Ext(path)],
+		width:        videoData.FirstVideoStream().Width,
+		heignt:       videoData.FirstVideoStream().Height,
+		clickthrough: landingPage,
+	}
+}
+
+func (c *Creative) generateVastTag() {
+	vastTree := generateVastTree(*c)
+
+	c.vastTree = *vastTree
+}
+
+func (c *Creative) saveVastToFile() {
+	xmlFileName := strings.TrimSuffix(filepath.Base(c.path), filepath.Ext(filepath.Base(c.path)))
+	xmlFileNamePath := fmt.Sprintf("%s/%s.xml", ResultXmlFolder, xmlFileName)
+	c.vastTree.WriteToFile(xmlFileNamePath)
+
+	c.xmlPath = xmlFileNamePath
+}
+
+func (c *Creative) saveVastToDB() {
+	var db *gorm.DB
+	var err error
+
+	host := os.Getenv("HOST")
+	dbPort := os.Getenv("DBPORT")
+	dbName := os.Getenv("NAME")
+	user := os.Getenv("USER")
+	password := os.Getenv("PASSWORD")
+
+	dsn := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s port=%s", host, user, dbName, password, dbPort)
+
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println("Successfully connected to DB!", db)
+	}
 }
 
 func main() {
 	var videoPath string
-	fmt.Print("Enter the creative file path: ")
-	fmt.Scanln(&videoPath)
+	videoPath = "./videos/1.mp4"
+	//fmt.Print("Enter the creative file path: ")
+	//fmt.Scanln(&videoPath)
 
 	var landingPage string
-	fmt.Print("Enter the landing page: ")
-	fmt.Scanln(&landingPage)
+	landingPage = "qwe"
+	// fmt.Print("Enter the landing page: ")
+	// fmt.Scanln(&landingPage)
 
-	creative := newCreative(videoPath)
-	creative.clickthrough = landingPage
+	creative := NewCreative(videoPath, landingPage)
 
-	vastTree := generateVastTree(*creative)
+	creative.generateVastTag()
 
-	// Save the VAST tag to the .xml file
-	xmlFileName := strings.TrimSuffix(filepath.Base(videoPath), filepath.Ext(filepath.Base(videoPath)))
-	xmlFileNamePath := fmt.Sprintf("%s/%s.xml", ResultXmlFolder, xmlFileName)
-	vastTree.WriteToFile(xmlFileNamePath)
-
-	// TODO: Save the vast tag in the sql DB
+	creative.saveVastToFile()
+	creative.saveVastToDB()
 }
