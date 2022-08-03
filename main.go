@@ -68,7 +68,7 @@ func main() {
 
 	vastTree := generateVastTree(*creative)
 
-	// Save the VAST tag to the file .xml file
+	// Save the VAST tag to the .xml file
 	xmlFileName := strings.TrimSuffix(filepath.Base(videoPath), filepath.Ext(filepath.Base(videoPath)))
 	xmlFileNamePath := fmt.Sprintf("%s/%s.xml", ResultXmlFolder, xmlFileName)
 	vastTree.WriteToFile(xmlFileNamePath)
