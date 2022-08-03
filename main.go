@@ -97,14 +97,12 @@ func (c *Creative) saveVastToDB() {
 
 func main() {
 	var videoPath string
-	videoPath = "./videos/1.mp4"
-	//fmt.Print("Enter the creative file path: ")
-	//fmt.Scanln(&videoPath)
+	fmt.Print("Enter the creative file path: ")
+	fmt.Scanln(&videoPath)
 
 	var landingPage string
-	landingPage = "qwe"
-	// fmt.Print("Enter the landing page: ")
-	// fmt.Scanln(&landingPage)
+	fmt.Print("Enter the landing page: ")
+	fmt.Scanln(&landingPage)
 
 	creative := NewCreative(videoPath, landingPage)
 
