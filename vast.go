@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"strconv"
 
 	"github.com/beevik/etree"
@@ -9,7 +8,7 @@ import (
 
 const SkipOffset = "00:00:05"
 
-func generateVAST(creative Creative) {
+func generateVastTree(creative Creative) *etree.Document {
 	doc := etree.NewDocument()
 	doc.CreateProcInst("VAST", `version="3.0"`)
 
@@ -60,5 +59,5 @@ func generateVAST(creative Creative) {
 	mediafile.CreateCData("htttp://example.com/") // TODO: upload the file to s3 and use its s3 url here
 
 	doc.Indent(2)
-	doc.WriteTo(os.Stdout)
+	return doc
 }

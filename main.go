@@ -6,10 +6,13 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
+
+const ResultXmlFolder string = "results"
 
 type Creative struct {
 	path         string
@@ -36,7 +39,7 @@ func getVideoData(path string) *ffprobe.ProbeData {
 	return data
 }
 
-func initCreative(path string) *Creative {
+func newCreative(path string) *Creative {
 	videoData := getVideoData(path)
 
 	width, height := videoData.FirstVideoStream().Width, videoData.FirstVideoStream().Height
@@ -60,8 +63,15 @@ func main() {
 	fmt.Print("Enter the landing page: ")
 	fmt.Scanln(&landingPage)
 
-	creative := initCreative(videoPath)
+	creative := newCreative(videoPath)
 	creative.clickthrough = landingPage
 
-	generateVAST(*creative)
+	vastTree := generateVastTree(*creative)
+
+	// Save the VAST tag to the file .xml file
+	xmlFileName := strings.TrimSuffix(filepath.Base(videoPath), filepath.Ext(filepath.Base(videoPath)))
+	xmlFileNamePath := fmt.Sprintf("%s/%s.xml", ResultXmlFolder, xmlFileName)
+	vastTree.WriteToFile(xmlFileNamePath)
+
+	// TODO: Save the vast tag in the sql DB
 }

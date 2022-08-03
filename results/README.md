@@ -1,0 +1,1 @@
+The folder where the service stores ready-to-use .xml VAST tags
