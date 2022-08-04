@@ -61,12 +61,6 @@ func NewCreative(path string, landingPage string) *Creative {
 	}
 }
 
-func (c *Creative) generateVastTag() {
-	vastTree := generateVastTree(*c)
-
-	c.vastTree = *vastTree
-}
-
 func (c *Creative) saveVastToFile() {
 	xmlFileName := strings.TrimSuffix(filepath.Base(c.path), filepath.Ext(filepath.Base(c.path)))
 	xmlFileNamePath := fmt.Sprintf("%s/%s.xml", ResultXmlFolder, xmlFileName)
@@ -106,7 +100,7 @@ func main() {
 
 	creative := NewCreative(videoPath, landingPage)
 
-	creative.generateVastTag()
+	creative.generateVastTree()
 
 	creative.saveVastToFile()
 	creative.saveVastToDB()

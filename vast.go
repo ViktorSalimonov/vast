@@ -8,7 +8,7 @@ import (
 
 const SkipOffset = "00:00:05"
 
-func generateVastTree(creative Creative) *etree.Document {
+func (c *Creative) generateVastTree() {
 	doc := etree.NewDocument()
 	doc.CreateProcInst("VAST", `version="3.0"`)
 
@@ -39,7 +39,7 @@ func generateVastTree(creative Creative) *etree.Document {
 
 	videoClicks := inline.CreateElement("VideoClicks")
 	clickThrough := videoClicks.CreateElement("ClickThrough")
-	clickThrough.CreateCData(creative.clickthrough)
+	clickThrough.CreateCData(c.clickthrough)
 
 	creatives := inline.CreateElement("Creatives")
 	creativeElem := creatives.CreateElement("Creative")
@@ -48,16 +48,17 @@ func generateVastTree(creative Creative) *etree.Document {
 	linear.CreateAttr("skipoffset", SkipOffset)
 
 	duration := linear.CreateElement("Duration")
-	duration.CreateText(creative.duration)
+	duration.CreateText(c.duration)
 
 	mediafiles := linear.CreateElement("MediaFiles")
 	mediafile := mediafiles.CreateElement("MediaFile")
 	mediafile.CreateAttr("delivery", "progressive")
-	mediafile.CreateAttr("type", creative.format)
-	mediafile.CreateAttr("width", strconv.Itoa(creative.width))
-	mediafile.CreateAttr("height", strconv.Itoa(creative.heignt))
+	mediafile.CreateAttr("type", c.format)
+	mediafile.CreateAttr("width", strconv.Itoa(c.width))
+	mediafile.CreateAttr("height", strconv.Itoa(c.heignt))
 	mediafile.CreateCData("htttp://example.com/") // TODO: upload the file to s3 and use its s3 url here
 
 	doc.Indent(2)
-	return doc
+
+	c.vastTree = *doc
 }
