@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,7 +50,7 @@ func NewCreative(path string, landingPage string) *Creative {
 
 	durationInSeconds := int(videoData.Format.DurationSeconds)
 	durationFormatted := fmt.Sprintf("%02d:%02d:%02d", durationInSeconds/3600, (durationInSeconds%3600)/60, durationInSeconds%60)
-	videoFormatMap := map[string]string{".mp4": "video/mp4", ".avi": "video/api"}
+	videoFormatMap := map[string]string{".mp4": "video/mp4", ".mov": "video/mov", ".wmv": "video/wmv"}
 
 	return &Creative{
 		path:         path,
@@ -91,12 +92,30 @@ func (c *Creative) saveVastToDB() {
 
 func main() {
 	var videoPath string
-	fmt.Print("Enter the creative file path: ")
-	fmt.Scanln(&videoPath)
+	for {
+		fmt.Println("Enter the creative file path: ")
+		fmt.Scanln(&videoPath)
+		if _, err := os.Stat(videoPath); err != nil {
+			fmt.Println("File does not exist")
+			continue
+		}
+		if videoExt := filepath.Ext(videoPath); videoExt != ".mp4" && videoExt != ".mov" && videoExt != ".wmv" {
+			fmt.Println("Invalid file extension. The video format must be one of the following: .mp4, .mov, .wmv")
+		} else {
+			break
+		}
+	}
 
 	var landingPage string
-	fmt.Print("Enter the landing page: ")
-	fmt.Scanln(&landingPage)
+	for {
+		fmt.Println("Enter the landing page: ")
+		fmt.Scanln(&landingPage)
+		if _, err := url.ParseRequestURI(landingPage); err != nil {
+			fmt.Println("Invalid URL")
+		} else {
+			break
+		}
+	}
 
 	creative := NewCreative(videoPath, landingPage)
 
