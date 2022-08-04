@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -91,12 +92,30 @@ func (c *Creative) saveVastToDB() {
 
 func main() {
 	var videoPath string
-	fmt.Print("Enter the creative file path: ")
-	fmt.Scanln(&videoPath)
+	for {
+		fmt.Println("Enter the creative file path: ")
+		fmt.Scanln(&videoPath)
+		if _, err := os.Stat(videoPath); err != nil {
+			fmt.Println("File does not exist")
+			continue
+		}
+		if videoExt := filepath.Ext(videoPath); videoExt != ".mp4" && videoExt != ".mov" && videoExt != ".wmv" {
+			fmt.Println("Invalid file extension. The video format must be one of the following: .mp4, .mov, .wmv")
+		} else {
+			break
+		}
+	}
 
 	var landingPage string
-	fmt.Print("Enter the landing page: ")
-	fmt.Scanln(&landingPage)
+	for {
+		fmt.Println("Enter the landing page: ")
+		fmt.Scanln(&landingPage)
+		if _, err := url.ParseRequestURI(landingPage); err != nil {
+			fmt.Println("Invalid URL")
+		} else {
+			break
+		}
+	}
 
 	creative := NewCreative(videoPath, landingPage)
 
