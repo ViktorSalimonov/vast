@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>VAST tag generator</title>
+        <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+      </head>
+<body>
+    <div class="container py-4">
+        <header class="pb-3 mb-4 border-bottom">
+          <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
+           <span class="fs-4">VAST generator</span>
+          </a>
+        </header>
+
+        <div class="p-5 mb-4 bg-light rounded-3">
+          <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold">Creative input</h1>
+            <form action="/upload" enctype="multipart/form-data" method="post" >
+                <label for="video-upload">Choose a creative video file:</label>
+                <input class="form-control" type="file" name="creativeFile" accept=".mp4, .mov, .wmv"/>
+                <label class="float-right" for="creativeFile">Available formats: mp4, mov, wmv</label>
+                <br>
+                <label for="landingPage">Enter landing page:</label>
+                <input class="form-control" type="url" name="landingPage" />
+                <br>
+                <input type="submit" value="Generate VAST tag" />
+          </form>
+          </div>
+        </div>
+      </div>
+</body>
+</html>

@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -89,19 +92,80 @@ func (c *Creative) saveVastToDB() {
 	}
 }
 
-func main() {
-	var videoPath string
-	fmt.Print("Enter the creative file path: ")
-	fmt.Scanln(&videoPath)
-
-	var landingPage string
-	fmt.Print("Enter the landing page: ")
-	fmt.Scanln(&landingPage)
-
+func processVideo(videoPath string, landingPage string) *Creative {
 	creative := NewCreative(videoPath, landingPage)
 
 	creative.generateVastTree()
 
 	creative.saveVastToFile()
-	creative.saveVastToDB()
+	// creative.saveVastToDB()
+
+	return creative
+}
+
+func GenerateVastHttpHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		// render input page
+		t, err := template.ParseFiles("web/index.html")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		t.Execute(w, nil)
+	} else if r.Method == "POST" {
+		// parse multipart/form-data input
+		r.ParseMultipartForm(32 << 20)
+
+		// retrieve file from posted form-data
+		landingPage := r.FormValue("landingPage")
+		file, handler, err := r.FormFile("creativeFile")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		defer file.Close()
+
+		log.Printf("Uploaded file: %+v\n", handler.Filename)
+		log.Printf("File size: %+v\n", handler.Size)
+		log.Printf("MIME header: %+v\n", handler.Header)
+
+		// write tmp file on the server
+		tempFile, err := ioutil.TempFile("videos", fmt.Sprintf("*-%s", handler.Filename))
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		fileBytes, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		tempFile.Write(fileBytes)
+		defer tempFile.Close()
+
+		// process the file
+		c := processVideo(tempFile.Name(), landingPage)
+		vast, err := c.vastTree.WriteToString()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		// render result page
+		t, err := template.ParseFiles("web/result.html")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		t.Execute(w, vast)
+	}
+}
+
+func setupRoutes() {
+	http.HandleFunc("/", GenerateVastHttpHandler)
+	http.ListenAndServe(":8080", nil)
+}
+
+func main() {
+	setupRoutes()
 }
