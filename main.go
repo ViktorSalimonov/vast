@@ -52,7 +52,7 @@ func NewCreative(path string, landingPage string) *Creative {
 
 	durationInSeconds := int(videoData.Format.DurationSeconds)
 	durationFormatted := fmt.Sprintf("%02d:%02d:%02d", durationInSeconds/3600, (durationInSeconds%3600)/60, durationInSeconds%60)
-	videoFormatMap := map[string]string{".mp4": "video/mp4", ".avi": "video/api"}
+	videoFormatMap := map[string]string{".mp4": "video/mp4", ".mov": "video/mov", ".wmv": "video/wmv"}
 
 	return &Creative{
 		path:         path,
