@@ -163,6 +163,7 @@ func GenerateVastHttpHandler(w http.ResponseWriter, r *http.Request) {
 
 func setupRoutes() {
 	http.HandleFunc("/", GenerateVastHttpHandler)
+	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./web/css"))))
 	http.ListenAndServe(":8080", nil)
 }
 
