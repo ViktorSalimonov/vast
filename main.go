@@ -88,7 +88,28 @@ func (c *Creative) saveVastToDB() {
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Println("Successfully connected to DB!", db)
+		fmt.Println("Successfully connected to DB!")
+	}
+
+	type Vast struct {
+		id         uint
+		vast_tag   string
+		created_at time.Time
+	}
+
+	vastTag, err := c.vastTree.WriteToString()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result := db.Model(&Vast{}).Create(map[string]interface{}{
+		"vast_tag":   vastTag,
+		"created_at": time.Now(),
+	})
+	if result.Error != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println("Successfully inserted into DB!")
 	}
 }
 
@@ -98,7 +119,7 @@ func processVideo(videoPath string, landingPage string) *Creative {
 	creative.generateVastTree()
 
 	creative.saveVastToFile()
-	// creative.saveVastToDB()
+	creative.saveVastToDB()
 
 	return creative
 }
